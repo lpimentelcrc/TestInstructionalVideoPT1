@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>Food Prep Training – Video Steps</title>
+  <style>
+    :root {
+      --bg: #0b0b10;
+      --fg: #ffffff;
+      --muted: #a9b1c0;
+      --accent: #4a7dff;
+      --accent-press: #2d5fe6;
+      --radius: 16px;
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+      --safe-right: env(safe-area-inset-right);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .wrap {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      padding: calc(8px + var(--safe-top)) calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
+    }
+
+    header {
+      text-align: center;
+      font-size: clamp(18px, 4vw, 22px);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .player-shell {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      /* Responsive 16:9 area */
+      aspect-ratio: 16 / 9;
+      background: #11151c;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    /* The iframe fills the shell */
+    .player-shell iframe, .player-shell .placeholder {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* Overlay bottom controls */
+    .controls {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0));
+    }
+
+    .btn {
+      -webkit-user-select: none; user-select: none;
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-size: clamp(16px, 4.5vw, 18px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.3px;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(74,125,255,0.35);
+      transform: translateZ(0);
+      touch-action: manipulation;
+    }
+    .btn:active { background: var(--accent-press); transform: scale(0.98); }
+    .btn[hidden] { display: none; }
+
+    .pill {
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      color: var(--fg);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(6px);
+    }
+
+    .topbar {
+      position: absolute;
+      top: 8px; left: 8px; right: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .step {
+      font-size: clamp(13px, 3.5vw, 14px);
+      color: var(--muted);
+      font-weight: 600;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 8px 12px;
+      border-radius: 999px;
+    }
+
+    .title {
+      text-align: center;
+      margin-top: 8px;
+      font-size: clamp(16px, 5vw, 18px);
+      color: #dfe7ff;
+      min-height: 1.2em;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Larger touch targets on very small screens */
+    @media (max-width: 380px) {
+      .btn { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>Food Prep Readiness – Quick Steps</header>
+
+    <div class="player-shell" id="player-shell" role="region" aria-label="Training video player">
+      <div class="topbar">
+        <span class="step" id="stepPill">Step 1 of 3</span>
+        <button id="unmuteBtn" class="pill" type="button" aria-label="Unmute video">🔊 Unmute</button>
+      </div>
+
+      <!-- YouTube Player will mount here -->
+      <div id="player" class="placeholder" aria-hidden="true"></div>
+
+      <div class="controls">
+        <button id="nextBtn" class="btn" hidden type="button">Next</button>
+      </div>
+    </div>
+
+    <div class="title" id="videoTitle">Hair Net</div>
+
+    <footer>Autoplays muted for mobile compatibility. You can unmute anytime.</footer>
+  </div>
+
+  <!-- YouTube IFrame API -->
+  <script>
+    // Your three videos (IDs extracted from the YouTube URLs)
+    const STEPS = [
+      { id: "O1vwSjB8WKw", label: "Hair Net",    cta: "Next"  },
+      { id: "WkHrh-_Nh8Y", label: "Wash Hands",  cta: "Next"  },
+      { id: "M95eVd3a0fU", label: "Gloves",      cta: "Start" },
+    ];
+
+    let player;
+    let current = 0;
+    let firstFullPlaySeen = [false, false, false]; // shows CTA only after first full play
+    const nextBtn   = document.getElementById("nextBtn");
+    const unmuteBtn = document.getElementById("unmuteBtn");
+    const stepPill  = document.getElementById("stepPill");
+    const titleEl   = document.getElementById("videoTitle");
+
+    function loadYouTubeAPI() {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+    }
+
+    // YouTube API callback
+    window.onYouTubeIframeAPIReady = function() {
+      player = new YT.Player('player', {
+        host: 'https://www.youtube-nocookie.com',   // privacy-enhanced domain
+        width: '100%',
+        height: '100%',
+        videoId: STEPS[current].id,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,           // hide default controls
+          disablekb: 1,          // no keyboard controls
+          fs: 0,                 // hide fullscreen button
+          rel: 0,                // no related videos at end
+          modestbranding: 1,     // minimal branding
+          iv_load_policy: 3,     // hide annotations
+          playsinline: 1,        // iOS inline playback
+          // We will handle looping ourselves to reliably catch "ended" once
+          // loop: handled via onStateChange
+          origin: window.location.origin
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        }
+      });
+      refreshUI();
+    };
+
+    function onPlayerReady() {
+      // Autoplay succeeds on mobile only when muted
+      player.mute();
+      player.playVideo();
+    }
+
+    function onPlayerStateChange(event) {
+      const YTP = YT.PlayerState;
+      if (event.data === YTP.ENDED) {
+        // First time this step fully ends -> reveal CTA, then loop
+        if (!firstFullPlaySeen[current]) {
+          firstFullPlaySeen[current] = true;
+          showCTA(true);
+        }
+        // Manually loop seamlessly
+        try {
+          player.seekTo(0, true);
+          player.playVideo();
+        } catch (e) {
+          // fallback: small delay then play
+          setTimeout(() => { player.playVideo(); }, 50);
+        }
+      }
+    }
+
+    function showCTA(show) {
+      if (show) {
+        nextBtn.hidden = false;
+        nextBtn.textContent = STEPS[current].cta;
+      } else {
+        nextBtn.hidden = true;
+      }
+    }
+
+    function refreshUI() {
+      stepPill.textContent = `Step ${current + 1} of ${STEPS.length}`;
+      titleEl.textContent = STEPS[current].label;
+      // Only show button if first full play already happened on this step
+      showCTA(firstFullPlaySeen[current]);
+    }
+
+    function goTo(index) {
+      current = index;
+      player.loadVideoById(STEPS[current].id);
+      refreshUI();
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const last = current === STEPS.length - 1;
+      if (last) {
+        // DEFAULT BEHAVIOR: restart the sequence
+        // Change this to navigate or call your app logic.
+        firstFullPlaySeen = [false, false, false];
+        goTo(0);
+        return;
+      }
+      goTo(current + 1);
+    });
+
+    unmuteBtn.addEventListener('click', () => {
+      if (player && typeof player.isMuted === "function") {
+        if (player.isMuted()) {
+          player.unMute();
+          unmuteBtn.textContent = "🔈 Mute";
+          unmuteBtn.setAttribute("aria-label", "Mute video");
+        } else {
+          player.mute();
+          unmuteBtn.textContent = "🔊 Unmute";
+          unmuteBtn.setAttribute("aria-label", "Unmute video");
+        }
+        // Keep playing after toggle
+        try { player.playVideo(); } catch {}
+      }
+    });
+
+    // Kick things off
+    loadYouTubeAPI();
+  </script>
+</body>
+</html>
