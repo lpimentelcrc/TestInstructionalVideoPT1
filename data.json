@@ -1,0 +1,19 @@
+{
+  "project_name": "HACK Assembly Simulator",
+  "version": "1.0",
+  "predefined_symbols": {
+    "SP": "0",
+    "LCL": "1",
+    "ARG": "2",
+    "THIS": "3",
+    "THAT": "4",
+    "R0": "0",
+    "R1": "1",
+    "SCREEN": "16384",
+    "KBD": "24576"
+  },
+  "default_settings": {
+    "initial_rom_address": 0,
+    "initial_ram_address": 16
+  }
+}
