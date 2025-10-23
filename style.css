@@ -1,0 +1,20 @@
+/* Custom styles for the code editor area */
+#editor-area {
+    min-height: 80vh; /* Ensure it takes up enough vertical space */
+    font-family: 'Inter', monospace;
+    white-space: pre-wrap;
+    tab-size: 4;
+    line-height: 1.5;
+}
+
+/* Set 'Inter' as the default font */
+body {
+    font-family: "Inter", sans-serif;
+}
+
+/* The original file had an embedded Tailwind config. 
+    In a clean separation, custom color/font extension would 
+    typically be done via a local install and build process, 
+    but for a simple CDN setup, we rely on the standard defaults.
+    The custom font reference for 'Inter' is here.
+*/
